@@ -320,7 +320,7 @@ int ll_indexOf(LinkedList* this, void* pElement)
 
     if(this!=NULL)
     {
-    	for(int i=0;i<this->size;i++)
+    	for(int i=0;i<ll_len(this);i++)
     	{
     		nodoBuscado=getNode(this,i);
     		if(nodoBuscado->pElement==pElement)
