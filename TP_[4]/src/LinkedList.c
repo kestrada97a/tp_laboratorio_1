@@ -163,12 +163,12 @@ int test_addNode(LinkedList* this, int nodeIndex,void* pElement)
 int ll_add(LinkedList* this, void* pElement)
 {
     int returnAux = -1;
-    int i=0;
+    int indice=0;
 
     if(this!=NULL)
     {
-    	i=ll_len(this);
-    	returnAux=addNode(this,i,pElement);
+    	indice=ll_len(this);
+    	returnAux=addNode(this,indice,pElement);
     }
     return returnAux;
 }
@@ -267,11 +267,10 @@ int ll_remove(LinkedList* this,int index)
 int ll_clear(LinkedList* this)
 {
     int returnAux = -1;
-    int iAuxiliar=ll_len(this);
 
     if(this!=NULL)
     {
-    	for(int i=0;i<iAuxiliar;i++) //en teoría esto deberia usar la funcion "remove" para eliminar todo lo que esta adentro de la iteracioni sisisi ojala que funcione, ojo que la lista no la elimina(no debería).
+    	for(int i=0;i<ll_len(this);i++) //en teoría esto deberia usar la funcion "remove" para eliminar todo lo que esta adentro de la iteracioni sisisi ojala que funcione, ojo que la lista no la elimina(no debería).
     	{
     		returnAux=ll_remove(this,i);
     		if(returnAux==-1)
@@ -344,7 +343,15 @@ int ll_indexOf(LinkedList* this, void* pElement)
 int ll_isEmpty(LinkedList* this)
 {
     int returnAux = -1;
+    if(this!=NULL)
+    {
+    	returnAux=0;
+    }
 
+    if(ll_len(this)==0)
+    {
+    	returnAux=1;
+    }
     return returnAux;
 }
 
@@ -360,6 +367,10 @@ int ll_isEmpty(LinkedList* this)
 int ll_push(LinkedList* this, int index, void* pElement)
 {
     int returnAux = -1;
+    if(this!=NULL && (index>=0 && index<ll_len(this)))
+    {
+    	returnAux=addNode(this, index, pElement);
+    }
 
     return returnAux;
 }
@@ -377,7 +388,13 @@ void* ll_pop(LinkedList* this,int index)
 {
     void* returnAux = NULL;
 
-    return returnAux;
+    if(this!=NULL && (index>=0&&index<ll_len(this)))
+    {
+    	returnAux=ll_get(this, index); //lo agarra
+    	ll_remove(this,index);//lo elimina
+    }
+
+    return returnAux;//devuelve el que agarraste
 }
 
 
@@ -392,7 +409,17 @@ void* ll_pop(LinkedList* this,int index)
 int ll_contains(LinkedList* this, void* pElement)
 {
     int returnAux = -1;
+    int auxiliar;
+    if(this!=NULL)
+    {
+    	returnAux=0;
+    	auxiliar=ll_indexOf(this, pElement);
+    	if(auxiliar!=-1) //-1 porq es lo que devuelve el ll_indexOf en caso de error.
+    	{
+    		returnAux=1;
+    	}
 
+    }
     return returnAux;
 }
 
@@ -408,7 +435,23 @@ int ll_contains(LinkedList* this, void* pElement)
 int ll_containsAll(LinkedList* this,LinkedList* this2)
 {
     int returnAux = -1;
-
+    void* pAuxiliar;
+    if(this!=NULL && this2!=NULL)
+    {
+    	returnAux=0; //mira por ahora lo estas dejando aca pero la verdad no tenes idea si es mejor ponerlo abajo o no.
+    	if(ll_len(this2)>0)
+    	{
+    		for(int i=0;i<ll_len(this2);i++)
+    		{
+    			pAuxiliar=ll_get(this2,i);
+    			returnAux=ll_contains(this,pAuxiliar); //va a devolver 1 si esta todo OK
+    			if(returnAux==0)
+    			{
+    				break;
+    			}
+    		}
+    	}
+    }
     return returnAux;
 }
 
@@ -425,7 +468,18 @@ int ll_containsAll(LinkedList* this,LinkedList* this2)
 LinkedList* ll_subList(LinkedList* this,int from,int to)
 {
     LinkedList* cloneArray = NULL;
+    LinkedList* pAuxiliar=ll_newLinkedList();
+    void* pElement;
 
+    if(this!=NULL && (from>=0 && from<ll_len(this)) && (to>0&&to<=ll_len(this)))
+    {
+    	for(int i=from;i<to;i++)
+    	{
+    		pElement=ll_get(this,i);
+    		ll_add(pAuxiliar,pElement);
+    	}
+    	cloneArray=pAuxiliar;
+    }
     return cloneArray;
 }
 
@@ -441,6 +495,11 @@ LinkedList* ll_clone(LinkedList* this)
 {
     LinkedList* cloneArray = NULL;
 
+    if(this!=NULL)
+    {
+    	cloneArray=ll_subList(this,0,ll_len(this));
+    }
+
     return cloneArray;
 }
 
@@ -455,6 +514,53 @@ LinkedList* ll_clone(LinkedList* this)
 int ll_sort(LinkedList* this, int (*pFunc)(void* ,void*), int order)
 {
     int returnAux =-1;
+    int len=ll_len(this);
+    int orderSwitch;
+
+    void* dato1;
+    void* dato2;
+    void* pAuxiliar;
+
+    if(this!=NULL && pFunc!=NULL && (order==0 || order==1))
+    {
+
+    	for(int i=0;i<len-1;i++)
+    	{
+    		for(int j=i+1;j<len;j++)
+    		{
+    			dato1=ll_get(this,i);
+    			dato2=ll_get(this,j);
+    			if(dato1!=NULL && dato2!=NULL)
+    			{
+    				orderSwitch=pFunc(dato1,dato2);
+    				switch(orderSwitch)
+    				{
+    				case -1:
+    					if(order==0)
+    					{
+    						pAuxiliar=dato1;
+    						ll_set(this,i,dato2);
+    						ll_set(this,j,pAuxiliar);
+    					}
+    					break;
+    				case 1:
+    					if(order==1)
+    					{
+    						pAuxiliar=dato1;
+    						ll_set(this,i,dato2);
+    						ll_set(this,j,pAuxiliar);
+    					}
+    					break;
+    				}
+    				returnAux=0;
+    			}
+    		}
+    	}
+    }
+
+
+
+
 
     return returnAux;
 
